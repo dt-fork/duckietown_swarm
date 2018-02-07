@@ -148,8 +148,8 @@ class SwarmBot(irc.bot.SingleServerIRCBot):
     def __init__(self, incoming, channel, nickname):
         servers = [
                 ('frankfurt.co-design.science', 6667),
-                ('irc.freenode.net', 6667),
-                ('192.168.134.1', 6667),
+#                ('irc.freenode.net', 6667),
+#                ('192.168.134.1', 6667),
         ]
 
         irc.bot.SingleServerIRCBot.__init__(self, servers, nickname, nickname)
