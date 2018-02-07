@@ -111,7 +111,7 @@ def pubsub_writer_process():
 def pubsub_friendship():
     ## Read from the queue
     ID = get_ipfs_id()
-    print('IPFS ID: %s' % ID)
+#    print('IPFS ID: %s' % ID)
     # connect to mama duck
 #    mama = 'QmW5P8PZhGYGoyGzAGZNKNTKrvbg8m7Wv4QF4o2ghYmuf9'
 #    cmd = ['ipfs', 'swarm', 'connect', '--timeout', '30s', '/p2p-circuit/ipfs/' + mama]
@@ -184,18 +184,19 @@ class SwarmBot(irc.bot.SingleServerIRCBot):
     def on_privmsg(self, c, e):
         self._handle(c, e)
 
-    def on_welcome(self, connection, event):
-        print('welcome message from %s: \n%s' % (connection.server, " ".join(event.arguments)))
+    def on_welcome(self, connection, _event):
+#        print('welcome message from %s: \n%s' % (connection.server, " ".join(event.arguments)))
         connection.join(self.target)
+        print('Connected to %s on IRC server %s.' % (self.target, connection.server))
         self.admitted = True
 
     def on_join(self, _c, _e):
         users = self.channels[self.target].users()
         self.nusers = len(users)
-        print('current users: %s' % users)
+#        print('current users: %s' % users)
 
     def on_disconnect(self, _c, event):
-        print('on_disconnect..', event.__dict__)
+        print('Disconnected', event.__dict__)
         self.disconnected = True
 
     @contract(d=dict)
@@ -236,28 +237,28 @@ def add_ipfs_dir(dirname):
         raise Exception(msg)
     hashed = out[1]
     return hashed
-
-
-def get_summary(known, seen):
-    m = MakeIPFS()
-    s = '<html><head></head><body><pre>\n'
-
-    s += '<h2>Mine</h2>'
-    for f, h in seen.items():
-        b = os.path.basename(f)
-        m.add_file(b, h, 0)
-        s += '\n<a href="%s">%s</a>' % (b, b)
-
-    s += '<h2>Others</h2>'
-    for h in known:
-        m.add_file(h, h, 0)
-        s += '\n<a href="%s">%s</a>' % (h, h)
-
-    s += '\n</pre></body>'
-
-    m.add_file_content('index.html', s)
-
-    return m.get_ipfs_hash()
+#
+#
+#def get_summary(known, seen):
+#    m = MakeIPFS()
+#    s = '<html><head></head><body><pre>\n'
+#
+#    s += '<h2>Mine</h2>'
+#    for f, h in seen.items():
+#        b = os.path.basename(f)
+#        m.add_file(b, h, 0)
+#        s += '\n<a href="%s">%s</a>' % (b, b)
+#
+#    s += '<h2>Others</h2>'
+#    for h in known:
+#        m.add_file(h, h, 0)
+#        s += '\n<a href="%s">%s</a>' % (h, h)
+#
+#    s += '\n</pre></body>'
+#
+#    m.add_file_content('index.html', s)
+#
+#    return m.get_ipfs_hash()
 
 
 def get_ipfs_id():
@@ -278,15 +279,19 @@ class Queues():
 
 def duckietown_swarm_main():
     args = sys.argv[1:]
-    watch_dir = args[1]
-    home_dir = args[0]
+    if not args:
+        watch_dir = os.path.expanduser('~/shared-logs')
+    else:
+        watch_dir = args[0]
 
-    print('watch_dir: %s' % watch_dir)
-    print('home_dir: %s' % home_dir)
-    if not os.path.exists(home_dir):
-        os.makedirs(home_dir)
+#    home_dir = args[0]
     if not os.path.exists(watch_dir):
         os.makedirs(watch_dir)
+    print('You can put any log file in the directory\n\n\t%s\n\nand it will be shared with the swarm.\n\n' % watch_dir)
+#    print('watch_dir: %s' % watch_dir)
+#    print('home_dir: %s' % home_dir)
+#    if not os.path.exists(home_dir):
+#        os.makedirs(home_dir)
 
     pubsub_reader = Process(target=pubsub_reader_process, args=())
     pubsub_reader.daemon = True
@@ -331,7 +336,7 @@ def start_irc():
             c.admitted = False
             c._connect()
             while not c.admitted:
-                print('Waiting for welcome')
+                # print('Waiting for welcome')
                 time.sleep(1)
                 c.reactor.process_once()
 

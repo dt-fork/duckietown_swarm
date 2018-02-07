@@ -1,3 +1,4 @@
+from Queue import Empty
 import time
 
 
@@ -5,9 +6,13 @@ def brain():
     from duckietown_swarm.irc2 import Queues
     dc = DistributedCache()
     while True:
-        msg = Queues.incoming.get()
+        try:
+            msg = Queues.incoming.get(block=False, timeout=1.0)
+            dc.interpret(msg)
+        except Empty:
+            pass
         # print('brain recv: %r' % msg)
-        dc.interpret(msg)
+
         messages = dc.rebroadcast()
         for m in messages:
             # print('brain send: %r' % m)
